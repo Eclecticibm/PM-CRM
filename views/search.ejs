@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('partials/head', { title: 'Search' }) %></head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container">
+    <h1>Search results for "<%= q %>"</h1>
+
+    <h2>Clients</h2>
+    <table class="table">
+      <thead><tr><th>Name</th><th>Company</th><th>Email</th></tr></thead>
+      <tbody>
+        <% clientResults.forEach(function(c) { %>
+          <tr><td><a href="/clients/<%= c.id %>"><%= c.name %></a></td><td><%= c.company||'' %></td><td><%= c.email||'' %></td></tr>
+        <% }) %>
+        <% if (clientResults.length === 0) { %><tr><td colspan="3">No matching clients.</td></tr><% } %>
+      </tbody>
+    </table>
+
+    <h2>Notes / Interactions</h2>
+    <ul class="timeline">
+      <% noteResults.forEach(function(n) { %>
+        <li class="timeline-item">
+          <div class="timeline-header">
+            <span class="badge badge-type-<%= n.type %>"><%= n.type %></span>
+            <a href="/clients/<%= n.client_id %>"><%= n.client_name %></a>
+            <span class="timeline-date"><%= n.occurred_at %></span>
+          </div>
+          <div class="timeline-summary"><%= n.summary %></div>
+        </li>
+      <% }) %>
+      <% if (noteResults.length === 0) { %><li>No matching notes.</li><% } %>
+    </ul>
+  </main>
+</body>
+</html>

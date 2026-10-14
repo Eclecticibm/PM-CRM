@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'My Tasks' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <main class="container">
+    <h1>My Tasks</h1>
+
+    <% function renderBucket(label, items) { %>
+      <h2><%= label %> (<%= items.length %>)</h2>
+      <ul class="task-list">
+        <% items.forEach(function(t) { %>
+          <li class="task-item task-<%= t.computed_status %>">
+            <span class="task-title">
+              <% if (t.client_id) { %><a href="/clients/<%= t.client_id %>"><%= t.client_name %></a> — <% } %>
+              <%= t.title %>
+            </span>
+            <span class="task-meta">due <%= t.due_date %> · <%= t.priority %></span>
+            <% if (t.status === 'open') { %>
+              <form method="POST" action="/tasks/<%= t.id %>/done" style="display:inline">
+                <button type="submit" class="btn btn-tiny">Mark Done</button>
+              </form>
+            <% } %>
+          </li>
+        <% }) %>
+        <% if (items.length === 0) { %><li>Nothing here.</li><% } %>
+      </ul>
+    <% } %>
+
+    <% renderBucket('Overdue', buckets.overdue) %>
+    <% renderBucket('Due Today', buckets.today) %>
+    <% renderBucket('This Week', buckets.week) %>
+    <% renderBucket('Later', buckets.later) %>
+    <% renderBucket('Done', buckets.done) %>
+  </main>
+</body>
+</html>

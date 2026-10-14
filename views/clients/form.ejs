@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<%
+  // Local alias only — the top-level render key is `clientRecord` because
+  // EJS reserves `client` as a compile OPTION name (breaks include() if used
+  // as a data key). See routes/clients.js comment for details.
+  var client = clientRecord;
+%>
+<head><%- include('../partials/head', { title: client && client.id ? 'Edit Client' : 'New Client' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <main class="container">
+    <h1><%= client && client.id ? 'Edit Client' : 'New Client' %></h1>
+
+    <% if (errors && errors.length) { %>
+      <div class="alert alert-error">
+        <ul><% errors.forEach(function(e) { %><li><%= e %></li><% }) %></ul>
+      </div>
+    <% } %>
+
+    <% if (duplicates && duplicates.length) { %>
+      <div class="alert alert-warning">
+        <strong>Possible duplicate client(s) found</strong> matching this email/phone:
+        <ul>
+          <% duplicates.forEach(function(d) { %>
+            <li><a href="/clients/<%= d.id %>" target="_blank"><%= d.name %></a> (<%= d.email || '' %>, <%= d.phone || '' %>)</li>
+          <% }) %>
+        </ul>
+        <form method="POST" action="/clients">
+          <% Object.keys(client || {}).forEach(function(k) { %>
+            <input type="hidden" name="<%= k %>" value="<%= client[k] %>">
+          <% }) %>
+          <input type="hidden" name="confirm_duplicate" value="1">
+          <button type="submit" class="btn btn-warning">Save anyway (not a duplicate)</button>
+        </form>
+      </div>
+    <% } %>
+
+    <form method="POST" action="<%= client && client.id ? '/clients/' + client.id + '?_method=PUT' : '/clients' %>" class="form">
+      <label>Name *<input type="text" name="name" value="<%= client ? client.name : '' %>" required></label>
+      <label>Company<input type="text" name="company" value="<%= client ? (client.company||'') : '' %>"></label>
+      <label>Email<input type="email" name="email" value="<%= client ? (client.email||'') : '' %>"></label>
+      <label>Phone<input type="text" name="phone" value="<%= client ? (client.phone||'') : '' %>"></label>
+      <label>Address<input type="text" name="address" value="<%= client ? (client.address||'') : '' %>"></label>
+      <label>Status
+        <select name="status">
+          <% ['lead','active','inactive','churned'].forEach(function(s) { %>
+            <option value="<%= s %>" <%= client && client.status === s ? 'selected' : '' %>><%= s %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Source<input type="text" name="source" value="<%= client ? (client.source||'') : '' %>" placeholder="e.g. referral, website, cold call"></label>
+      <label>Owner
+        <select name="owner_id">
+          <option value="">(unassigned)</option>
+          <% allUsers.forEach(function(u) { %>
+            <option value="<%= u.id %>" <%= client && String(client.owner_id) === String(u.id) ? 'selected' : '' %>><%= u.name %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Tags<input type="text" name="tags" value="<%= client ? (client.tags||'') : '' %>" placeholder="comma,separated,tags"></label>
+      <label>Notes<textarea name="notes" rows="4"><%= client ? (client.notes||'') : '' %></textarea></label>
+      <button type="submit" class="btn btn-primary">Save</button>
+      <a href="/clients" class="btn btn-link">Cancel</a>
+    </form>
+  </main>
+</body>
+</html>

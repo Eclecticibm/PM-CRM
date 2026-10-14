@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Archived Clients' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <main class="container">
+    <h1>Archived Clients</h1>
+    <p><a href="/clients">&larr; Back to active clients</a></p>
+    <table class="table">
+      <thead><tr><th>Name</th><th>Company</th><th>Status</th><th></th></tr></thead>
+      <tbody>
+        <% clients.forEach(function(c) { %>
+          <tr>
+            <td><a href="/clients/<%= c.id %>"><%= c.name %></a></td>
+            <td><%= c.company || '' %></td>
+            <td><%= c.status %></td>
+            <td>
+              <form action="/clients/<%= c.id %>/unarchive" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-tiny">Unarchive</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (clients.length === 0) { %><tr><td colspan="4">No archived clients.</td></tr><% } %>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

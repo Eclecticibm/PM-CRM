@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('../partials/head', { title: 'Import Clients CSV' }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <main class="container">
+    <h1>Import Clients from CSV</h1>
+    <p><a href="/clients">&larr; Back to clients</a></p>
+
+    <div class="alert alert-info">
+      <p>CSV must use these exact column headers (first row), order doesn't matter.
+      Only <code>name</code> is required.</p>
+      <code>name,company,email,phone,address,status,source,tags,notes</code>
+      <p><code>status</code> must be one of: lead, active, inactive, churned (defaults to "lead" if blank/invalid).
+      <code>tags</code> is a comma-separated list inside the cell.</p>
+    </div>
+
+    <% if (result) { %>
+      <% if (result.error) { %>
+        <div class="alert alert-error"><%= result.error %></div>
+      <% } else { %>
+        <div class="alert alert-success">
+          Imported <%= result.created %> client(s). Skipped <%= result.skipped %>.
+        </div>
+        <% if (result.errors && result.errors.length) { %>
+          <div class="alert alert-warning">
+            <ul><% result.errors.forEach(function(e) { %><li><%= e %></li><% }) %></ul>
+          </div>
+        <% } %>
+      <% } %>
+    <% } %>
+
+    <form method="POST" action="/clients/import/csv" enctype="multipart/form-data" class="form">
+      <label>CSV File<input type="file" name="file" accept=".csv" required></label>
+      <button type="submit" class="btn btn-primary">Import</button>
+    </form>
+  </main>
+</body>
+</html>

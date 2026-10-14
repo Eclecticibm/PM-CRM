@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<%
+  // Local alias only — top-level render key is `clientRecord` (see form.ejs comment).
+  var client = clientRecord;
+%>
+<head><%- include('../partials/head', { title: client.name }) %></head>
+<body>
+  <%- include('../partials/nav') %>
+  <main class="container">
+    <div class="page-header">
+      <h1><%= client.name %> <span class="badge badge-<%= client.status %>"><%= client.status %></span></h1>
+      <div class="page-actions">
+        <a href="/clients/<%= client.id %>/edit" class="btn btn-secondary">Edit</a>
+        <% if (!client.archived) { %>
+          <form action="/clients/<%= client.id %>/archive" method="POST" style="display:inline" onsubmit="return confirm('Archive this client?');">
+            <button type="submit" class="btn btn-danger">Archive</button>
+          </form>
+        <% } else { %>
+          <form action="/clients/<%= client.id %>/unarchive" method="POST" style="display:inline">
+            <button type="submit" class="btn btn-secondary">Unarchive</button>
+          </form>
+        <% } %>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <section class="detail-info">
+        <h2>Profile</h2>
+        <table class="kv-table">
+          <tr><th>Company</th><td><%= client.company || '—' %></td></tr>
+          <tr><th>Email</th><td><%= client.email || '—' %></td></tr>
+          <tr><th>Phone</th><td><%= client.phone || '—' %></td></tr>
+          <tr><th>Address</th><td><%= client.address || '—' %></td></tr>
+          <tr><th>Source</th><td><%= client.source || '—' %></td></tr>
+          <tr><th>Owner</th><td><%= client.owner_name || '—' %></td></tr>
+          <tr><th>Tags</th><td><%= client.tags || '—' %></td></tr>
+          <tr><th>Created</th><td><%= client.created_at %></td></tr>
+        </table>
+        <% if (client.notes) { %>
+          <h3>Notes</h3>
+          <p class="notes-block"><%= client.notes %></p>
+        <% } %>
+      </section>
+
+      <section class="detail-tasks">
+        <h2>Tasks</h2>
+        <form method="POST" action="/clients/<%= client.id %>/tasks" class="inline-form">
+          <input type="text" name="title" placeholder="Task title" required>
+          <input type="date" name="due_date" required>
+          <select name="priority">
+            <option value="low">low</option>
+            <option value="medium" selected>medium</option>
+            <option value="high">high</option>
+          </select>
+          <select name="assignee_id">
+            <% allUsers.forEach(function(u) { %>
+              <option value="<%= u.id %>"><%= u.name %></option>
+            <% }) %>
+          </select>
+          <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+        <ul class="task-list">
+          <% tasks.forEach(function(t) { %>
+            <li class="task-item task-<%= t.computed_status %>">
+              <span class="task-title"><%= t.title %></span>
+              <span class="task-meta">due <%= t.due_date %> · <%= t.priority %> · <%= t.assignee_name || 'unassigned' %> · <%= t.computed_status %></span>
+              <% if (t.status === 'open') { %>
+                <form method="POST" action="/tasks/<%= t.id %>/done" style="display:inline">
+                  <button type="submit" class="btn btn-tiny">Mark Done</button>
+                </form>
+              <% } %>
+            </li>
+          <% }) %>
+          <% if (tasks.length === 0) { %><li>No tasks yet.</li><% } %>
+        </ul>
+      </section>
+    </div>
+
+    <section class="detail-attachments">
+      <h2>Attachments</h2>
+      <form method="POST" action="/clients/<%= client.id %>/attachments" enctype="multipart/form-data" class="inline-form">
+        <input type="file" name="file" required>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </form>
+      <ul class="attachment-list">
+        <% attachments.forEach(function(a) { %>
+          <li>
+            <a href="/clients/<%= client.id %>/attachments/<%= a.id %>/download"><%= a.original_name %></a>
+            <span class="task-meta">uploaded <%= a.uploaded_at %> by <%= a.uploader_name || 'unknown' %></span>
+          </li>
+        <% }) %>
+        <% if (attachments.length === 0) { %><li>No files uploaded yet.</li><% } %>
+      </ul>
+    </section>
+
+    <section class="detail-timeline">
+      <h2>Interaction Timeline</h2>
+      <form method="POST" action="/clients/<%= client.id %>/interactions" class="inline-form interaction-form">
+        <select name="type">
+          <option value="call">Call</option>
+          <option value="email">Email</option>
+          <option value="meeting">Meeting</option>
+          <option value="note" selected>Note</option>
+        </select>
+        <input type="datetime-local" name="occurred_at">
+        <input type="text" name="summary" placeholder="Summary" required style="flex:2;">
+        <input type="text" name="outcome" placeholder="Outcome (optional)">
+        <button type="submit" class="btn btn-primary">Log</button>
+      </form>
+
+      <ul class="timeline">
+        <% interactions.forEach(function(i) { %>
+          <li class="timeline-item <%= i.pinned ? 'pinned' : '' %>">
+            <div class="timeline-header">
+              <span class="badge badge-type-<%= i.type %>"><%= i.type %></span>
+              <span class="timeline-date"><%= i.occurred_at %></span>
+              <span class="timeline-user">by <%= i.logged_by_name || 'unknown' %></span>
+              <% if (i.pinned) { %><span class="pin-flag">📌 pinned</span><% } %>
+              <form method="POST" action="/clients/<%= client.id %>/interactions/<%= i.id %>/pin" style="display:inline">
+                <button type="submit" class="btn btn-tiny"><%= i.pinned ? 'Unpin' : 'Pin' %></button>
+              </form>
+            </div>
+            <div class="timeline-summary"><%= i.summary %></div>
+            <% if (i.outcome) { %><div class="timeline-outcome">Outcome: <%= i.outcome %></div><% } %>
+          </li>
+        <% }) %>
+        <% if (interactions.length === 0) { %><li>No interactions logged yet.</li><% } %>
+      </ul>
+    </section>
+  </main>
+</body>
+</html>

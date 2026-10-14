@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><%- include('partials/head', { title: 'Dashboard' }) %></head>
+<body>
+  <%- include('partials/nav') %>
+  <main class="container">
+    <h1>Dashboard</h1>
+
+    <div class="card-grid">
+      <div class="stat-card">
+        <div class="stat-value"><%= totalClients %></div>
+        <div class="stat-label">Total Clients</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= newThisMonth %></div>
+        <div class="stat-label">New This Month</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= taskCounts.today %></div>
+        <div class="stat-label">Tasks Due Today (org)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value"><%= taskCounts.overdue %></div>
+        <div class="stat-label">Overdue Tasks (org)</div>
+      </div>
+    </div>
+
+    <h2>My Tasks Summary</h2>
+    <div class="card-grid">
+      <div class="stat-card"><div class="stat-value"><%= myTaskCounts.today %></div><div class="stat-label">Due Today</div></div>
+      <div class="stat-card"><div class="stat-value"><%= myTaskCounts.week %></div><div class="stat-label">This Week</div></div>
+      <div class="stat-card"><div class="stat-value"><%= myTaskCounts.overdue %></div><div class="stat-label">Overdue</div></div>
+    </div>
+    <p><a href="/tasks" class="btn btn-secondary">Go to My Tasks</a></p>
+
+    <div class="two-col">
+      <section>
+        <h2>Clients by Status</h2>
+        <table class="table">
+          <thead><tr><th>Status</th><th>Count</th></tr></thead>
+          <tbody>
+            <% statusBreakdown.forEach(function(row) { %>
+              <tr><td><%= row.status %></td><td><%= row.c %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+      <section>
+        <h2>Clients by Source</h2>
+        <table class="table">
+          <thead><tr><th>Source</th><th>Count</th></tr></thead>
+          <tbody>
+            <% sourceBreakdown.forEach(function(row) { %>
+              <tr><td><%= row.source %></td><td><%= row.c %></td></tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <h2>Activity Volume per User (last 30 days)</h2>
+    <table class="table">
+      <thead><tr><th>User</th><th>Interactions Logged</th></tr></thead>
+      <tbody>
+        <% activityByUser.forEach(function(row) { %>
+          <tr><td><%= row.user_name %></td><td><%= row.c %></td></tr>
+        <% }) %>
+        <% if (activityByUser.length === 0) { %>
+          <tr><td colspan="2">No activity logged yet.</td></tr>
+        <% } %>
+      </tbody>
+    </table>
+  </main>
+</body>
+</html>

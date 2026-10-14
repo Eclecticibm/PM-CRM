@@ -1,0 +1,18 @@
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="/" class="brand">CRM</a>
+    <% if (currentUser) { %>
+      <a href="/clients">Clients</a>
+      <a href="/tasks">My Tasks</a>
+      <% if (currentUser.role === 'admin') { %><a href="/users">Users</a><% } %>
+      <form class="search-form" action="/search" method="GET">
+        <input type="text" name="q" placeholder="Search clients &amp; notes..." value="<%= typeof q !== 'undefined' ? q : '' %>">
+      </form>
+      <span class="nav-spacer"></span>
+      <span class="nav-user"><%= currentUser.name %> (<%= currentUser.role %>)</span>
+      <form action="/logout" method="POST" style="display:inline">
+        <button type="submit" class="link-btn">Logout</button>
+      </form>
+    <% } %>
+  </div>
+</nav>
